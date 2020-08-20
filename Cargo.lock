@@ -443,7 +443,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gap-the-mind-storage-rs"
+name = "gap_the_mind"
 version = "0.1.0"
 dependencies = [
  "chrono",
@@ -452,7 +452,7 @@ dependencies = [
  "serde",
  "tantivy",
  "toml",
- "uuid 0.8.1",
+ "uuid 0.7.4",
 ]
 
 [[package]]
@@ -1499,6 +1499,10 @@ name = "uuid"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90dbc611eb48397705a6b0f6e917da23ae517e4d127123d2cf7674206627d32a"
+dependencies = [
+ "rand 0.6.5",
+ "serde",
+]
 
 [[package]]
 name = "uuid"
