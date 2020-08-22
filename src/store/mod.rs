@@ -10,6 +10,7 @@ use std::path::Path;
 #[derive(Debug)]
 pub enum StoreError {
     OpenRepoError,
+    QueryError,
 }
 
 pub struct StorageContext {}

@@ -11,5 +11,7 @@ pub fn open_repo(path: &Path) -> Result<Repository, StoreError> {
 }
 
 impl Store {
-    fn list_all(&self) {}
+    pub fn list_all(&self) {
+        println!("{:?}", self.repo.workdir());
+    }
 }

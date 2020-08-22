@@ -1,5 +1,5 @@
 use super::model::*;
-use super::{StorageContext, Store};
+use super::{StorageContext, Store, StoreError};
 use juniper::{FieldResult, GraphQLError, Value, Variables};
 
 pub type Schema = juniper::RootNode<'static, Query, Mutation>;
@@ -55,12 +55,12 @@ impl Store {
         })
     }
 
-    pub fn query(&self) -> Result<Value, GraphQLError> {
+    pub fn query(&self) -> Result<Value, StoreError> {
         let variables = Variables::new();
         self.query_with_variables(&variables)
     }
 
-    pub fn query_with_variables(&self, variables: &Variables) -> Result<Value, GraphQLError> {
+    pub fn query_with_variables(&self, variables: &Variables) -> Result<Value, StoreError> {
         let res = juniper::execute(
             "query { notes {id} }",
             None,
@@ -69,9 +69,12 @@ impl Store {
             &self.context,
         );
 
-        res.and_then(|r| {
-            let (v, _e) = r;
-            Ok(v)
-        })
+        match res {
+            Ok(r) => {
+                let (v, _e) = r;
+                Ok(v)
+            }
+            Err(_) => Err(StoreError::QueryError),
+        }
     }
 }

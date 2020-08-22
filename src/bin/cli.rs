@@ -1,8 +1,8 @@
-use gap_the_mind::{StorageContext, Store};
+use gap_the_mind::{StorageContext, Store, StoreError};
 use std::env;
 use std::path::Path;
 
-fn main() {
+fn main() -> Result<(), StoreError> {
     let args: Vec<String> = env::args().collect();
 
     let path = &args[1];
@@ -10,10 +10,12 @@ fn main() {
 
     let ctx = StorageContext {};
 
-    let store = Store::new(path, ctx);
-    let store = store.unwrap();
+    let store = Store::new(path, ctx)?;
 
-    let res = store.query();
-    let res = res.unwrap();
+    let res = store.query()?;
     println!("{:?}", toml::to_string_pretty(&res));
+
+    store.list_all();
+
+    Ok(())
 }
