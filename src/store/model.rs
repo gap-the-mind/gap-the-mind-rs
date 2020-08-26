@@ -2,7 +2,7 @@ use juniper::{GraphQLInputObject, GraphQLObject, GraphQLType};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-trait Entity<'a>: Serialize + Deserialize<'a> + GraphQLType {
+pub trait Entity<'a>: Serialize + Deserialize<'a> + GraphQLType {
     fn id(&self) -> Uuid;
     fn nature(&self) -> &str;
 }

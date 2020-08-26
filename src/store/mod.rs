@@ -7,13 +7,21 @@ use graphql::Schema;
 use repo::open_repo;
 use std::path::Path;
 
+pub use model::*;
+
 #[derive(Debug)]
 pub enum StoreError {
     OpenRepoError,
     QueryError,
+    WriteError,
+    CommitError,
+    MarshallError,
 }
 
-pub struct StorageContext {}
+pub struct StorageContext {
+    pub name: String,
+    pub email: String,
+}
 
 pub struct Store {
     schema: Schema,
