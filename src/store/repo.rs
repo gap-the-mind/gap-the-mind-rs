@@ -40,6 +40,7 @@ impl Store {
         index
             .add_all(["*"].iter(), IndexAddOption::DEFAULT, None)
             .or(Err(StoreError::WriteError))?;
+
         index.write().or(Err(StoreError::WriteError))?;
         let oid = index.write_tree().or(Err(StoreError::CommitError))?;
 
@@ -47,13 +48,16 @@ impl Store {
         let signature = Signature::now(self.context.name.as_str(), self.context.email.as_str())
             .or(Err(StoreError::CommitError))?;
 
+        let parent = self.repo.head().or(Err(StoreError::CommitError))?;
+        let parent = parent.peel_to_commit().or(Err(StoreError::CommitError))?;
+
         match self.repo.commit(
-            None,
+            Some("HEAD"),
             &signature,
             &signature,
             format!("Edited {}", entity.id()).as_str(),
             &tree,
-            &[],
+            &[&parent],
         ) {
             Ok(_) => Ok(()),
             Err(_) => Err(StoreError::CommitError),
