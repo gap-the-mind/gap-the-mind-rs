@@ -15,15 +15,10 @@ fn main() -> Result<(), StoreError> {
 
     let store = Store::new(path, ctx)?;
 
-    let res = store.query()?;
+    let res = store.query("query {notes {id text}}")?;
     println!("{:?}", toml::to_string_pretty(&res));
 
     store.list_all();
-
-    let mut note = Note::new();
-    note.text = "Narf".to_string();
-
-    store.write_entity(&note);
 
     Ok(())
 }

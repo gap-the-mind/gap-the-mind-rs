@@ -1,11 +1,12 @@
 use super::model::Entity;
-use super::{StorageContext, Store, StoreError};
+use super::{Store, StoreError};
 
 use git2::{IndexAddOption, Repository, Signature};
-use std::fs::File;
-use std::io::prelude::Write;
-use std::path::Path;
-use uuid::Uuid;
+use std::fs;
+
+use std::path::{Path, PathBuf};
+
+use anyhow::{anyhow, Result};
 
 pub fn open_repo(path: &Path) -> Result<Repository, StoreError> {
     Repository::open(path)
@@ -18,49 +19,55 @@ impl Store {
         println!("{:?}", self.repo.workdir());
     }
 
-    pub fn write_entity<'a>(&self, entity: &impl Entity<'a>) -> Result<(), StoreError> {
-        let s = toml::to_string(entity).or(Err(StoreError::MarshallError))?;
-        let filename = format!("{}.toml", entity.id());
-
-        let path = self
-            .repo
+    pub fn path(&self, filename: &str) -> Result<PathBuf> {
+        self.repo
             .workdir()
             .map(|f| f.join(filename))
-            .ok_or(StoreError::WriteError)?;
+            .ok_or(anyhow!("Cannot write in bare repository"))
+    }
 
-        let file = path.clone();
+    pub fn write_entity<'a>(&self, entity: &impl Entity<'a>) -> Result<()> {
+        let s = toml::to_string(entity)?;
+        let filename = format!("{}.toml", entity.id());
 
-        let mut file = File::create(file).or(Err(StoreError::WriteError))?;
+        let path = self.path(filename.as_str())?;
+        fs::write(path, s)?;
 
-        file.write_all(s.as_bytes())
-            .or(Err(StoreError::WriteError))?;
+        let mut index = self.repo.index()?;
 
-        let mut index = self.repo.index().or(Err(StoreError::CommitError))?;
+        index.add_all(["*"].iter(), IndexAddOption::DEFAULT, None)?;
 
-        index
-            .add_all(["*"].iter(), IndexAddOption::DEFAULT, None)
-            .or(Err(StoreError::WriteError))?;
+        index.write()?;
+        let oid = index.write_tree()?;
 
-        index.write().or(Err(StoreError::WriteError))?;
-        let oid = index.write_tree().or(Err(StoreError::CommitError))?;
+        let tree = self.repo.find_tree(oid)?;
+        let signature = Signature::now(self.context.name.as_str(), self.context.email.as_str())?;
 
-        let tree = self.repo.find_tree(oid).or(Err(StoreError::CommitError))?;
-        let signature = Signature::now(self.context.name.as_str(), self.context.email.as_str())
-            .or(Err(StoreError::CommitError))?;
+        let parent = self.repo.head().and_then(|p| p.peel_to_commit())?;
 
-        let parent = self.repo.head().or(Err(StoreError::CommitError))?;
-        let parent = parent.peel_to_commit().or(Err(StoreError::CommitError))?;
-
-        match self.repo.commit(
+        self.repo.commit(
             Some("HEAD"),
             &signature,
             &signature,
             format!("Edited {}", entity.id()).as_str(),
             &tree,
             &[&parent],
-        ) {
-            Ok(_) => Ok(()),
-            Err(_) => Err(StoreError::CommitError),
-        }
+        )?;
+
+        Ok(())
+    }
+
+    pub fn read_entity<'a>(&self, entity: &mut impl Entity<'a>) -> Result<()> {
+        let filename = format!("{}.toml", entity.id());
+
+        let path = self
+            .repo
+            .workdir()
+            .map(|f| f.join(filename))
+            .ok_or(anyhow!("Cannot write in bare repository"))?;
+
+        let content = fs::read_to_string(path)?;
+
+        entity.deserialize(toml::Deserializer::new(content.as_str()))
     }
 }

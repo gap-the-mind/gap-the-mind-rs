@@ -14,6 +14,7 @@ pub enum StoreError {
     OpenRepoError,
     QueryError,
     WriteError,
+    ReadError,
     CommitError,
     MarshallError,
 }

@@ -55,19 +55,17 @@ impl Store {
         })
     }
 
-    pub fn query(&self) -> Result<Value, StoreError> {
+    pub fn query(&self, query: &str) -> Result<Value, StoreError> {
         let variables = Variables::new();
-        self.query_with_variables(&variables)
+        self.query_with_variables(query, &variables)
     }
 
-    pub fn query_with_variables(&self, variables: &Variables) -> Result<Value, StoreError> {
-        let res = juniper::execute(
-            "query { notes {id} }",
-            None,
-            &self.schema,
-            &variables,
-            &self.context,
-        );
+    pub fn query_with_variables(
+        &self,
+        query: &str,
+        variables: &Variables,
+    ) -> Result<Value, StoreError> {
+        let res = juniper::execute(query, None, &self.schema, &variables, &self.context);
 
         match res {
             Ok(r) => {
