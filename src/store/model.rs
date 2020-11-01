@@ -1,8 +1,9 @@
 use juniper::{GraphQLInputObject, GraphQLObject, GraphQLType};
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-pub trait Entity<'a>: Serialize + Deserialize<'a> + GraphQLType {
+pub trait Entity: Serialize + DeserializeOwned {
     fn id(&self) -> Uuid;
     fn nature(&self) -> &str;
 }
@@ -40,9 +41,9 @@ pub struct NoteInput {
     tags: Option<Vec<TagInput>>,
 }
 
-impl Entity<'_> for Note {
+impl Entity for Note {
     fn id(&self) -> Uuid {
-        self.id
+        self.id.clone()
     }
 
     fn nature(&self) -> &str {

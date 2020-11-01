@@ -1,4 +1,4 @@
-use gap_the_mind::{Note, StorageContext, Store, StoreError};
+use gap_the_mind::{StorageContext, Store, StoreError};
 use std::env;
 use std::path::Path;
 
@@ -16,7 +16,7 @@ fn main() -> Result<(), StoreError> {
     let store = Store::new(path, ctx)?;
 
     let res = store.query("query {notes {id text}}")?;
-    println!("{:?}", toml::to_string_pretty(&res));
+    println!("{:?}", serde_json::to_string_pretty(&res));
 
     store.list_all();
 

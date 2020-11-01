@@ -1,5 +1,7 @@
 use super::model::Entity;
 use super::{Store, StoreError};
+use std::fs::File;
+use std::io::BufReader;
 
 use git2::{IndexAddOption, Repository, Signature};
 use std::fs;
@@ -26,8 +28,8 @@ impl Store {
             .ok_or(anyhow!("Cannot write in bare repository"))
     }
 
-    pub fn write_entity<'a>(&self, entity: &impl Entity<'a>) -> Result<()> {
-        let s = toml::to_string(entity)?;
+    pub fn write_entity(&self, entity: &impl Entity) -> Result<()> {
+        let s = serde_json::to_string(entity)?;
         let filename = format!("{}.toml", entity.id());
 
         let path = self.path(filename.as_str())?;
@@ -57,7 +59,10 @@ impl Store {
         Ok(())
     }
 
-    pub fn read_entity<'a>(&self, entity: &mut impl Entity<'a>) -> Result<()> {
+    pub fn read_entity<T>(&self, entity: &mut T) -> Result<T>
+    where
+        T: Entity,
+    {
         let filename = format!("{}.toml", entity.id());
 
         let path = self
@@ -66,8 +71,13 @@ impl Store {
             .map(|f| f.join(filename))
             .ok_or(anyhow!("Cannot write in bare repository"))?;
 
-        let content = fs::read_to_string(path)?;
+        let file = File::open(path)?;
+        let reader = BufReader::new(file);
 
-        entity.deserialize(toml::Deserializer::new(content.as_str()))
+        let entity = serde_json::from_reader(reader)?;
+
+        Ok(entity)
+
+        // entity.deserialize(toml::Deserializer::new(content.as_str()))
     }
 }

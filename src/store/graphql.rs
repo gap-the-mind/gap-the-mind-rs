@@ -28,13 +28,13 @@ pub struct Mutation;
     Context = StorageContext
 )]
 impl Mutation {
-    fn createNote(ctx: &StorageContext, note_input: Option<NoteInput>) -> FieldResult<Note> {
+    fn create_note(ctx: &StorageContext, note_input: Option<NoteInput>) -> FieldResult<Note> {
         let note = Note::new();
 
         Ok(note)
     }
 
-    fn editNote(ctx: &StorageContext, note_input: NoteInput) -> FieldResult<Note> {
+    fn edit_note(ctx: &StorageContext, note_input: NoteInput) -> FieldResult<Note> {
         let note = Note::new();
 
         Ok(note)
