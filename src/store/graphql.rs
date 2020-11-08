@@ -18,7 +18,8 @@ pub struct Query;
 )]
 impl Query {
     fn notes(ctx: &StorageContext) -> FieldResult<Note> {
-        Ok(Note::new())
+        let note: Note = Default::default();
+        Ok(note)
     }
 }
 
@@ -29,13 +30,13 @@ pub struct Mutation;
 )]
 impl Mutation {
     fn create_note(ctx: &StorageContext, note_input: Option<NoteInput>) -> FieldResult<Note> {
-        let note = Note::new();
+        let note: Note = Default::default();
 
         Ok(note)
     }
 
     fn edit_note(ctx: &StorageContext, note_input: NoteInput) -> FieldResult<Note> {
-        let note = Note::new();
+        let note: Note = Default::default();
 
         Ok(note)
     }
@@ -49,10 +50,7 @@ impl Store {
             juniper::IntrospectionFormat::default(),
         );
 
-        schema.and_then(|s| {
-            let (v, _e) = s;
-            Ok(v)
-        })
+        schema.map(|s| s.0)
     }
 
     pub fn query(&self, query: &str) -> Result<Value, StoreError> {

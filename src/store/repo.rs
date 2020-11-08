@@ -25,12 +25,12 @@ impl Store {
         self.repo
             .workdir()
             .map(|f| f.join(filename))
-            .ok_or(anyhow!("Cannot write in bare repository"))
+            .ok_or_else(|| anyhow!("Cannot write in bare repository"))
     }
 
     pub fn write_entity(&self, entity: &impl Entity) -> Result<()> {
         let s = serde_json::to_string(entity)?;
-        let filename = format!("{}.toml", entity.id());
+        let filename = format!("{}.json", entity.id());
 
         let path = self.path(filename.as_str())?;
         fs::write(path, s)?;
@@ -63,13 +63,13 @@ impl Store {
     where
         T: Entity,
     {
-        let filename = format!("{}.toml", entity.id());
+        let filename = format!("{}.json", entity.id());
 
         let path = self
             .repo
             .workdir()
             .map(|f| f.join(filename))
-            .ok_or(anyhow!("Cannot write in bare repository"))?;
+            .ok_or_else(|| anyhow!("Cannot write in bare repository"))?;
 
         let file = File::open(path)?;
         let reader = BufReader::new(file);
@@ -77,7 +77,5 @@ impl Store {
         let entity = serde_json::from_reader(reader)?;
 
         Ok(entity)
-
-        // entity.deserialize(toml::Deserializer::new(content.as_str()))
     }
 }

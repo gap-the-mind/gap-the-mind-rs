@@ -1,4 +1,4 @@
-use juniper::{GraphQLInputObject, GraphQLObject, GraphQLType};
+use juniper::{GraphQLInputObject, GraphQLObject};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -20,12 +20,12 @@ pub struct Note {
     pub tags: Vec<Tag>,
 }
 
-impl Note {
-    pub fn new() -> Note {
+impl Default for Note {
+    fn default() -> Self {
         Note {
             id: Uuid::new_v4(),
-            text: String::new(),
-            tags: Vec::new(),
+            text: Default::default(),
+            tags: Default::default(),
         }
     }
 }
@@ -43,7 +43,7 @@ pub struct NoteInput {
 
 impl Entity for Note {
     fn id(&self) -> Uuid {
-        self.id.clone()
+        self.id
     }
 
     fn nature(&self) -> &str {

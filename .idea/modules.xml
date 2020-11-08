@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/gap-the-mind-rs.iml" filepath="$PROJECT_DIR$/.idea/gap-the-mind-rs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../storage/storage.iml" filepath="$PROJECT_DIR$/../storage/storage.iml" />
     </modules>
   </component>
 </project>
